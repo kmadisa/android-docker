@@ -12,7 +12,10 @@ RUN sed -i "s/^exit 101$/exit 0/" /usr/sbin/policy-rc.d
 # Install the Java Runtime Environment (JRE).
 RUN apt-get install -y default-jre
 #  Install the JDK
-RUN apt-get install -y default-jdk 
+RUN apt-get install -y default-jdk
+
+# Install git
+RUN apt-get install -y git
 
 ENV ANDROID_COMPILE_SDK=26
 ENV ANDROID_BUILD_TOOLS=26.0.0
@@ -41,24 +44,11 @@ ENV ANDROID_NDK_HOME=$PWD/ndk-bundle/android-ndk-r17/
 ENV PATH=$PATH:$PWD/android-sdk-linux/platform-tools/
 
 RUN echo y | android-sdk-linux/tools/bin/sdkmanager "emulator"
-RUN echo y | android-sdk-linux/tools/bin/sdkmanager "system-images;android-${ANDROID_COMPILE_SDK};google_apis;x86"
-RUN echo no | android-sdk-linux/tools/bin/avdmanager -v create avd -n test -k "system-images;android-${ANDROID_COMPILE_SDK};google_apis;x86" -f
-
-RUN apt-get update
+RUN echo y | android-sdk-linux/tools/bin/sdkmanager "system-images;android-${ANDROID_COMPILE_SDK};google_apis;x86_64"
+RUN echo no | android-sdk-linux/tools/bin/avdmanager -v create avd -n test -k "system-images;android-${ANDROID_COMPILE_SDK};google_apis;x86_64" -f
 
 RUN apt-get update && apt-get install -y --no-install-recommends apt-utils
 RUN apt-get install -y qemu-kvm libvirt-bin virtinst bridge-utils cpu-checker
 
-#RUN groupadd kvm
-RUN usermod -G kvm -a root
-RUN echo 'KERNEL=="kvm",GROUP="kvm",MODE="0660"' >> /etc/udev/rules.d/androidUseKVM.rules
-#RUN modeprobe kvm
-RUN systemctl enable --now libvirt-bin
 #https://github.com/boot2docker/boot2docker/issues/1138
 #RUN mknod /dev/kvm c 10 232
-
-
-#RUN mkdir -p /root/.android/avd/test.avd/
-#RUN cp -r android-sdk-linux/system-images/android-${ANDROID_COMPILE_SDK}/google_apis/x86/* /root/.android/avd/test.avd
-
-#RUN android-sdk-linux/tools/emulator -avd test -no-window -no-audio -initdata /root/.android/avd/test.avd/userdata.img &
